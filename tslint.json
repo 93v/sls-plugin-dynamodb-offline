@@ -1,0 +1,7 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended", "tslint:latest"],
+  "jsRules": {},
+  "rules": { "no-submodule-imports": [true, "serverless", "aws-sdk"] },
+  "rulesDirectory": []
+}

@@ -1,0 +1,69 @@
+{
+  "name": "sls-plugin-dynamodb-offline",
+  "version": "0.0.1",
+  "description": "Serverless Framework Plugin to Work with AWS DynamoDB Offline",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "tslint -p tsconfig.json",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags",
+    "start": "npm link && nodemon",
+    "make_bin": "mkdir -p bin",
+    "download": "curl -o bin/dynamodb_local_latest.tar.gz https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz",
+    "extract_archive": "tar -xzf bin/dynamodb_local_latest.tar.gz -C bin",
+    "postinstall": "echo 'npm run make_bin && npm run download && npm run extract_archive'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/93v/sls-plugin-dynamodb-offline.git"
+  },
+  "keywords": [
+    "serverless",
+    "serverless-plugin",
+    "sls",
+    "sls-plugin",
+    "aws",
+    "dynamodb",
+    "local",
+    "offline",
+    "dynamodb local",
+    "dynamodb offline"
+  ],
+  "author": {
+    "name": "93v",
+    "email": "93v@protonmail.com"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/93v/sls-plugin-dynamodb-offline/issues"
+  },
+  "homepage": "https://github.com/93v/sls-plugin-dynamodb-offline#readme",
+  "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
+    "@types/jest": "^24.0.15",
+    "@types/node": "^12.0.10",
+    "@types/serverless": "^1.18.2",
+    "eslint": "^6.0.1",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.2"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "dependencies": {
+    "aws-sdk": "^2.483.0",
+    "serverless": "^1.46.0",
+    "ts-optchain": "^0.1.7"
+  }
+}

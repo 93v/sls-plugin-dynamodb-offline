@@ -1,0 +1,113 @@
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node
+
+version: 2
+jobs:
+  install:
+    <<: *defaults
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: Install node modules
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - persist_to_workspace:
+          root: "~"
+          paths:
+            - repo
+
+  test:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: "~"
+
+      - run:
+          name: Lint
+          command: npm run lint
+
+      - run:
+          name: Test
+          command: npm run test
+
+      - persist_to_workspace:
+          root: "~"
+          paths:
+            - repo
+
+  build:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: "~"
+
+      - run:
+          name: Build
+          command: npm run build
+
+      - persist_to_workspace:
+          root: "~"
+          paths:
+            - repo
+
+  publish:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: "~"
+
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+
+      - run:
+          name: Publish the package
+          command: npm publish
+
+workflows:
+  version: 2
+  install_test_build_publish:
+    jobs:
+      - install:
+          filters:
+            tags:
+              only: /^v.*/
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - install
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - test
+      - publish:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

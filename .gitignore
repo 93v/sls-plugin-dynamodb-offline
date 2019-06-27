@@ -59,3 +59,11 @@ typings/
 
 # next.js build output
 .next
+
+# npm build output
+/dist
+
+.sonarlint/
+
+# Binary directry where the DynamoDB Local will be downlaoded
+/bin
