@@ -158,6 +158,9 @@ class ServerlessPlugin {
       ...this.additionalStacksMap,
       ...{ [Symbol(Date.now()).toString()]: this.defaultStack },
     }).forEach((stack) => {
+      if (stack == null) {
+        return;
+      }
       Object.values(stack.Resources).forEach((resource: any) => {
         if (resource.Type === "AWS::DynamoDB::Table") {
           tables.push(resource);
