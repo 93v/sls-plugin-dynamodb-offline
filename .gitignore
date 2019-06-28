@@ -64,6 +64,7 @@ typings/
 /dist
 
 .sonarlint/
+.idea/
 
 # Binary directry where the DynamoDB Local will be downlaoded
 /bin

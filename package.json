@@ -62,8 +62,8 @@
     "dist/**/*"
   ],
   "dependencies": {
-    "aws-sdk": "^2.483.0",
-    "serverless": "^1.46.0",
+    "aws-sdk": "^2.485.0",
+    "serverless": "^1.46.1",
     "ts-optchain": "^0.1.7"
   }
 }
