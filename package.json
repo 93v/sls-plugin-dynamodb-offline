@@ -18,8 +18,10 @@
     "start": "npm link && nodemon",
     "make_bin": "mkdir -p bin",
     "download": "curl -o bin/dynamodb_local_latest.tar.gz https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz",
+    "downloadSHA": "curl -o bin/dynamodb_local_latest.tar.gz.sha256 https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz.sha256",
+    "checkSHA": "cd bin && sha256sum -c dynamodb_local_latest.tar.gz.sha256",
     "extract_archive": "tar -xzf bin/dynamodb_local_latest.tar.gz -C bin",
-    "postinstall": "npm run make_bin && npm run download && npm run extract_archive"
+    "postinstall": "npm run make_bin && cd bin && npm run downloadSHA && npm run checkSHA || npm run download && npm run extract_archive"
   },
   "repository": {
     "type": "git",
