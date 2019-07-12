@@ -48,12 +48,22 @@
     "url": "https://github.com/93v/sls-plugin-dynamodb-offline/issues"
   },
   "homepage": "https://github.com/93v/sls-plugin-dynamodb-offline#readme",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm test",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "npm run lint && npm test"
+    }
+  },
   "devDependencies": {
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-conventional": "^8.0.0",
     "@types/aws-sdk": "^2.7.0",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.2",
     "@types/serverless": "^1.18.2",
     "eslint": "^6.0.1",
+    "husky": "^3.0.0",
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
     "ts-jest": "^24.0.2",
