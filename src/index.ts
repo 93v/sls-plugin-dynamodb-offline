@@ -10,7 +10,7 @@ import { IServerlessPluginCommand } from "../types/serverless-plugin-command";
 
 const DB_LOCAL_PATH = join(__dirname, "../bin");
 
-class ServerlessPlugin {
+class ServerlessDynamoDBOfflinePlugin {
   public commands: {
     [command: string]: IServerlessPluginCommand;
   };
@@ -214,4 +214,4 @@ class ServerlessPlugin {
   }
 }
 
-export = ServerlessPlugin;
+export = ServerlessDynamoDBOfflinePlugin;
