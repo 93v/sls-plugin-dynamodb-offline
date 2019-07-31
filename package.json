@@ -1,6 +1,6 @@
 {
   "name": "sls-plugin-dynamodb-offline",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "description": "Serverless Framework Plugin to Work with AWS DynamoDB Offline",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
