@@ -32,11 +32,12 @@ jobs:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
-      - run: npm run build
+      - run: npm run build --if-present
       - run: npm run semantic-release
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
           GH_TOKEN: ${{secrets.GH_TOKEN}}
+          CI: true
   # Uncomment this for a direct publish to npm
   # build-and-publish-npm:
   #   needs: build-and-publish-gpr
