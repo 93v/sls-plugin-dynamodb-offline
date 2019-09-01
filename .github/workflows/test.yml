@@ -1,4 +1,4 @@
-name: Node.js Package Lisn And Test
+name: Node.js Package Lint And Test
 
 on:
   push:
