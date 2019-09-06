@@ -197,6 +197,13 @@ class ServerlessDynamoDBOfflinePlugin {
     delete (params as any).PointInTimeRecoverySpecification;
     delete (params as any).TimeToLiveSpecification;
 
+    if (
+      params.StreamSpecification &&
+      params.StreamSpecification.StreamViewType
+    ) {
+      params.StreamSpecification.StreamEnabled = true;
+    }
+
     try {
       await dbClient.createTable(params).promise();
       this.serverless.cli.log(
