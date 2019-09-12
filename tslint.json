@@ -1,6 +1,11 @@
 {
   "defaultSeverity": "error",
-  "extends": ["tslint:recommended", "tslint:latest"],
+  "extends": [
+    "tslint:recommended",
+    "tslint:latest",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
   "jsRules": {},
   "rules": {
     "no-submodule-imports": [true, "serverless", "aws-sdk"]
