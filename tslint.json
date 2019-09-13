@@ -1,14 +1,14 @@
 {
-  "defaultSeverity": "error",
   "extends": [
     "tslint:recommended",
     "tslint:latest",
     "tslint-plugin-prettier",
     "tslint-config-prettier"
   ],
-  "jsRules": {},
+  "defaultSeverity": "error",
   "rules": {
-    "no-submodule-imports": [true, "serverless", "aws-sdk"]
-  },
-  "rulesDirectory": []
+    "prettier": true,
+    "no-implicit-dependencies": [true, "dev"],
+    "no-submodule-imports": false
+  }
 }

@@ -111,7 +111,7 @@ class ServerlessDynamoDBOfflinePlugin {
     this.dbInstances[port] = proc;
 
     return { proc, port };
-  }
+  };
 
   private killDynamoDBProcess = async (options: IDynamoDBLaunchOptions) => {
     const port = oc(options)
@@ -122,7 +122,7 @@ class ServerlessDynamoDBOfflinePlugin {
       this.dbInstances[port].kill("SIGKILL");
       delete this.dbInstances[port];
     }
-  }
+  };
 
   private startDynamoDB = async () => {
     if (this.dynamoDBConfig.start.noStart) {
@@ -180,12 +180,12 @@ class ServerlessDynamoDBOfflinePlugin {
     });
 
     await Promise.all(tables.map((table) => this.createTable(dbClient, table)));
-  }
+  };
 
   private stopDynamoDB = async () => {
     await this.killDynamoDBProcess(this.dynamoDBConfig.start);
     this.serverless.cli.log("DynamoDB Offline - Stopped");
-  }
+  };
 
   private createTable = async (dbClient: DynamoDB, table: any) => {
     const params: DynamoDB.CreateTableInput = table.Properties;
@@ -218,7 +218,7 @@ class ServerlessDynamoDBOfflinePlugin {
         throw error;
       }
     }
-  }
+  };
 }
 
 export = ServerlessDynamoDBOfflinePlugin;
