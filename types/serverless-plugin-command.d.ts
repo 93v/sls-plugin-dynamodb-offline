@@ -1,15 +1,14 @@
 export interface IServerlessPluginCommand {
-  commands?: {
-    [key: string]: IServerlessPluginCommand;
-  };
+  commands?: Record<string, IServerlessPluginCommand>;
   lifecycleEvents?: string[];
-  options?: {
-    [key: string]: {
+  options?: Record<
+    string,
+    {
+      default?: any;
       required?: boolean;
       shortcut?: string;
       usage?: string;
-      default?: any;
-    };
-  };
+    }
+  >;
   usage?: string;
 }

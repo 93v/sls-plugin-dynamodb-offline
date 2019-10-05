@@ -1,17 +1,15 @@
 export interface IStack {
-  Deploy?: any | null;
-  StackName?: string | null;
   Conditions?: any | null;
+  Deploy?: any | null;
   Description?: any | null;
   Mappings?: any | null;
   Metadata?: any | null;
   Outputs?: any | null;
   Parameters?: any | null;
   Resources?: any | null;
-  Transform?: any | null;
+  StackName?: string | null;
   Tags?: any | null;
+  Transform?: any | null;
 }
 
-export interface IStacksMap {
-  [key: string]: IStack;
-}
+export type IStacksMap = Record<string, IStack>;

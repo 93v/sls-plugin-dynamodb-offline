@@ -11,17 +11,13 @@ import { IServerlessPluginCommand } from "../types/serverless-plugin-command";
 const DB_LOCAL_PATH = join(__dirname, "../bin");
 
 class ServerlessDynamoDBOfflinePlugin {
-  public commands: {
-    [command: string]: IServerlessPluginCommand;
-  };
-  public hooks: {
-    [event: string]: () => Promise<any>;
-  };
+  public readonly commands: Record<string, IServerlessPluginCommand>;
+  public readonly hooks: Record<string, () => Promise<any>>;
   public provider: IProvider;
   private additionalStacksMap: IStacksMap;
   private defaultStack: IStack;
   private dynamoDBConfig: IDynamoDBConfig;
-  private dbInstances: { [port: string]: ChildProcess } = {};
+  private dbInstances: Record<string, ChildProcess> = {};
 
   public constructor(private serverless: Serverless) {
     this.provider = this.serverless.getProvider("aws");
