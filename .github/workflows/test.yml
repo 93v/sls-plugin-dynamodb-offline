@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 1
       - uses: actions/setup-node@v1
         with:
-          version: ${{ matrix.node_version }}
+          node-version: ${{ matrix.node_version }}
       - run: npm ci
       - run: npm run lint
       - run: npm run build --if-present
