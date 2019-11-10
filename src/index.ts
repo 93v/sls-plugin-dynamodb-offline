@@ -2,7 +2,6 @@ import { DynamoDB } from "aws-sdk/clients/all";
 import { ChildProcess, spawn } from "child_process";
 import { join } from "path";
 import Serverless from "serverless";
-import { oc } from "ts-optchain";
 import { IStack, IStacksMap } from "../types/additional-stack";
 import { IDynamoDBConfig, IDynamoDBLaunchOptions } from "../types/dynamodb";
 import { IProvider } from "../types/provider";
@@ -29,24 +28,21 @@ class ServerlessDynamoDBOfflinePlugin {
       "before:offline:start:init": this.startDynamoDB,
     };
 
-    this.dynamoDBConfig = oc(this.serverless).service.custom.dynamodb({});
+    this.dynamoDBConfig = this.serverless.service?.custom?.dynamodb || {};
 
-    this.additionalStacksMap = oc(
-      this.serverless,
-    ).service.custom.additionalStacks({});
+    this.additionalStacksMap =
+      this.serverless.service?.custom?.additionalStacks || {};
 
-    this.defaultStack = ((oc(this.serverless.service) as unknown) as {
+    this.defaultStack = (((this.serverless.service || {}) as unknown) as {
       resources: any;
-    }).resources();
+    }).resources;
   }
 
   private spawnDynamoDBProcess = async (options: IDynamoDBLaunchOptions) => {
     // We are trying to construct something like this:
     // java -D"java.library.path=./DynamoDBLocal_lib" -jar DynamoDBLocal.jar
 
-    const port = oc(options)
-      .port(8000)
-      .toString();
+    const port = (options.port || 8000).toString();
 
     const args = [];
 
@@ -110,9 +106,7 @@ class ServerlessDynamoDBOfflinePlugin {
   };
 
   private killDynamoDBProcess = async (options: IDynamoDBLaunchOptions) => {
-    const port = oc(options)
-      .port(8000)
-      .toString();
+    const port = (options.port || 8000).toString();
 
     if (this.dbInstances[port] != null) {
       this.dbInstances[port].kill("SIGKILL");
