@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "tslint -p tsconfig.json",
+    "lint": "eslint './src/**/*.{js,ts,tsx}'",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "build": "tsc",
@@ -54,9 +54,11 @@
   "devDependencies": {
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
-    "@types/jest": "^24.0.22",
-    "@types/node": "^12.12.7",
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.12.8",
     "@types/serverless": "^1.18.4",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-prettier": "^3.1.1",
@@ -66,16 +68,13 @@
     "prettier": "^1.19.1",
     "semantic-release": "^15.13.30",
     "ts-jest": "^24.1.0",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.7.2"
   },
   "files": [
     "dist/**/*"
   ],
   "dependencies": {
-    "aws-sdk": "^2.568.0",
+    "aws-sdk": "^2.573.0",
     "serverless": "^1.57.0"
   }
 }

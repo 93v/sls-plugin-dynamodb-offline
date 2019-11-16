@@ -2,20 +2,20 @@ import { DynamoDB } from "aws-sdk/clients/all";
 import { ChildProcess, spawn } from "child_process";
 import { join } from "path";
 import Serverless from "serverless";
-import { IStack, IStacksMap } from "../types/additional-stack";
-import { IDynamoDBConfig, IDynamoDBLaunchOptions } from "../types/dynamodb";
-import { IProvider } from "../types/provider";
-import { IServerlessPluginCommand } from "../types/serverless-plugin-command";
+import { Stack, IStacksMap } from "../types/additional-stack";
+import { DynamoDBConfig, DynamoDBLaunchOptions } from "../types/dynamodb";
+import { Provider } from "../types/provider";
+import { ServerlessPluginCommand } from "../types/serverless-plugin-command";
 
 const DB_LOCAL_PATH = join(__dirname, "../bin");
 
 class ServerlessDynamoDBOfflinePlugin {
-  public readonly commands: Record<string, IServerlessPluginCommand>;
+  public readonly commands: Record<string, ServerlessPluginCommand>;
   public readonly hooks: Record<string, () => Promise<any>>;
-  public provider: IProvider;
+  public provider: Provider;
   private additionalStacksMap: IStacksMap;
-  private defaultStack: IStack;
-  private dynamoDBConfig: IDynamoDBConfig;
+  private defaultStack: Stack;
+  private dynamoDBConfig: DynamoDBConfig;
   private dbInstances: Record<string, ChildProcess> = {};
 
   public constructor(private serverless: Serverless) {
@@ -38,7 +38,7 @@ class ServerlessDynamoDBOfflinePlugin {
     }).resources;
   }
 
-  private spawnDynamoDBProcess = async (options: IDynamoDBLaunchOptions) => {
+  private spawnDynamoDBProcess = async (options: DynamoDBLaunchOptions) => {
     // We are trying to construct something like this:
     // java -D"java.library.path=./DynamoDBLocal_lib" -jar DynamoDBLocal.jar
 
@@ -105,7 +105,7 @@ class ServerlessDynamoDBOfflinePlugin {
     return { proc, port };
   };
 
-  private killDynamoDBProcess = async (options: IDynamoDBLaunchOptions) => {
+  private killDynamoDBProcess = async (options: DynamoDBLaunchOptions) => {
     const port = (options.port || 8000).toString();
 
     if (this.dbInstances[port] != null) {

@@ -1,4 +1,4 @@
-export interface IStack {
+export interface Stack {
   Conditions?: any | null;
   Deploy?: any | null;
   Description?: any | null;
@@ -12,4 +12,4 @@ export interface IStack {
   Transform?: any | null;
 }
 
-export type IStacksMap = Record<string, IStack>;
+export type IStacksMap = Record<string, Stack>;

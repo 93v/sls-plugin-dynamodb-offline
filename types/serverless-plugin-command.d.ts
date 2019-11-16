@@ -1,5 +1,5 @@
-export interface IServerlessPluginCommand {
-  commands?: Record<string, IServerlessPluginCommand>;
+export interface ServerlessPluginCommand {
+  commands?: Record<string, ServerlessPluginCommand>;
   lifecycleEvents?: string[];
   options?: Record<
     string,

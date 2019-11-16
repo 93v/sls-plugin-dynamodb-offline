@@ -1,15 +1,15 @@
-export interface IDynamoDBConfig {
+export interface DynamoDBConfig {
   stage?: string[];
-  start: IDynamoDBStartConfig;
+  start: DynamoDBStartConfig;
 }
 
-interface IDynamoDBStartConfig extends IDynamoDBLaunchOptions {
+interface DynamoDBStartConfig extends DynamoDBLaunchOptions {
   migrate?: boolean | null;
   // seed?: boolean | null;
   noStart?: boolean | null;
 }
 
-export interface IDynamoDBLaunchOptions {
+export interface DynamoDBLaunchOptions {
   cors?: string | null;
   dbPath?: string | null;
   delayTransientStatuses?: boolean | null;
