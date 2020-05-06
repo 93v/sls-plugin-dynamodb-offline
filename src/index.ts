@@ -102,10 +102,24 @@ class ServerlessDynamoDBOfflinePlugin {
 
     this.dbInstances[port] = proc;
 
+    (([
+      "beforeExit",
+      "exit",
+      "SIGINT",
+      "SIGTERM",
+      "SIGUSR1",
+      "SIGUSR2",
+      "uncaughtException",
+    ] as unknown) as NodeJS.Signals[]).forEach((eventType) => {
+      process.on(eventType, () => {
+        this.killDynamoDBProcess(this.dynamoDBConfig.start);
+      });
+    });
+
     return { proc, port };
   };
 
-  private killDynamoDBProcess = async (options: DynamoDBLaunchOptions) => {
+  private killDynamoDBProcess = (options: DynamoDBLaunchOptions) => {
     const port = (options.port || 8000).toString();
 
     if (this.dbInstances[port] != null) {
@@ -173,7 +187,7 @@ class ServerlessDynamoDBOfflinePlugin {
   };
 
   private stopDynamoDB = async () => {
-    await this.killDynamoDBProcess(this.dynamoDBConfig.start);
+    this.killDynamoDBProcess(this.dynamoDBConfig.start);
     this.serverless.cli.log("DynamoDB Offline - Stopped");
   };
 
