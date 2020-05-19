@@ -2,7 +2,8 @@ import { DynamoDB } from "aws-sdk/clients/all";
 import { ChildProcess, spawn } from "child_process";
 import { join } from "path";
 import Serverless from "serverless";
-import { Stack, IStacksMap } from "../types/additional-stack";
+
+import { IStacksMap, Stack } from "../types/additional-stack";
 import { DynamoDBConfig, DynamoDBLaunchOptions } from "../types/dynamodb";
 import { Provider } from "../types/provider";
 import { ServerlessPluginCommand } from "../types/serverless-plugin-command";
