@@ -3,6 +3,7 @@ import {
   GetRecordsInput,
   GetShardIteratorInput,
 } from "aws-sdk/clients/dynamodbstreams";
+import { ClientConfiguration } from "aws-sdk/clients/lambda";
 import { ChildProcess, spawn } from "child_process";
 import { join } from "path";
 import Serverless from "serverless";
@@ -200,7 +201,7 @@ class ServerlessDynamoDBOfflinePlugin {
           getIteratorParams.ShardIteratorType = "AFTER_SEQUENCE_NUMBER";
           getIteratorParams.SequenceNumber = this.dynamoDBConfig.stream?.startAfter;
         } else {
-          getIteratorParams.ShardIteratorType = "TRIM_HORIZON";
+          getIteratorParams.ShardIteratorType = "LATEST";
         }
 
         const iterator = await this.dbStreamsClient
@@ -229,13 +230,15 @@ class ServerlessDynamoDBOfflinePlugin {
           }
 
           if (records.Records != null && records.Records.length) {
-            const lambda = new Lambda({
+            const lambdaParams: ClientConfiguration = {
               endpoint: `http://localhost:${
                 this.serverless.service.custom["serverless-offline"]
                   .lambdaPort || 3002
               }`,
               region: this.dynamoDBConfig.start.region || "local",
-            });
+            };
+
+            const lambda = new Lambda(lambdaParams);
 
             const params = {
               FunctionName: `${this.serverless.service["service"]}-${this.serverless.service.provider.stage}-${functionName}`,
