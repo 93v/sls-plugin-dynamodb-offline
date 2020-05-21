@@ -58,8 +58,6 @@ class ServerlessDynamoDBOfflinePlugin {
     // We are trying to construct something like this:
     // java -D"java.library.path=./DynamoDBLocal_lib" -jar DynamoDBLocal.jar
 
-    console.log(options);
-
     const port = (options.port || 8000).toString();
 
     const args = [];
