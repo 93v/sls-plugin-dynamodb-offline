@@ -1,12 +1,22 @@
+import { ShardIteratorType } from "aws-sdk/clients/dynamodbstreams";
+
 export interface DynamoDBConfig {
   stage?: string[];
   start: DynamoDBStartConfig;
+  stream?: DynamoDBStreamConfig;
 }
 
 interface DynamoDBStartConfig extends DynamoDBLaunchOptions {
   migrate?: boolean | null;
   // seed?: boolean | null;
   noStart?: boolean | null;
+}
+
+interface DynamoDBStreamConfig {
+  readInterval?: number | null;
+  iterator?: ShardIteratorType | null;
+  startAt?: string | null;
+  startAfter?: string | null;
 }
 
 export interface DynamoDBLaunchOptions {
@@ -20,4 +30,17 @@ export interface DynamoDBLaunchOptions {
 
   heapInitial?: string | null;
   heapMax?: string | null;
+
+  accessKeyId?: string | null;
+  secretAccessKey?: string | null;
+  region?: string | null;
+}
+
+export interface Stream {
+  enabled: boolean;
+  type: string;
+  arn: Record<string, string>;
+  tableName: string;
+  batchSize: number;
+  startingPosition: string;
 }
