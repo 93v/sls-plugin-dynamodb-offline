@@ -254,7 +254,9 @@ class ServerlessDynamoDBOfflinePlugin {
           );
         }
       }),
-    );
+    ).then((r) => {
+      console.log(r.length);
+    });
   };
 
   private startDynamoDB = async () => {
