@@ -264,22 +264,21 @@ class ServerlessDynamoDBOfflinePlugin {
       this.serverless.cli.log(
         "DynamoDB Offline - [noStart] options is true. Will not start.",
       );
-      return;
-    }
-
-    const { port, proc } = await this.spawnDynamoDBProcess(
-      this.dynamoDBConfig.start,
-    );
-
-    proc.on("close", (code) => {
-      this.serverless.cli.log(
-        `DynamoDB Offline - Failed to start with code ${code}`,
+    } else {
+      const { port, proc } = await this.spawnDynamoDBProcess(
+        this.dynamoDBConfig.start,
       );
-    });
 
-    this.serverless.cli.log(
-      `DynamoDB Offline - Started, visit: http://localhost:${port}/shell`,
-    );
+      proc.on("close", (code) => {
+        this.serverless.cli.log(
+          `DynamoDB Offline - Failed to start with code ${code}`,
+        );
+      });
+
+      this.serverless.cli.log(
+        `DynamoDB Offline - Started, visit: http://localhost:${port}/shell`,
+      );
+    }
 
     if (!this.dynamoDBConfig.start.migrate) {
       this.serverless.cli.log(
@@ -298,6 +297,8 @@ class ServerlessDynamoDBOfflinePlugin {
       secretAccessKey:
         this.dynamoDBConfig.start.secretAccessKey || "localAwsSecretAccessKey",
     };
+
+    console.log(clientConfig);
 
     this.dbClient = new DynamoDB(clientConfig);
 
