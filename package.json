@@ -75,6 +75,6 @@
   ],
   "dependencies": {
     "aws-sdk": "^2.787.0",
-    "serverless": "^1.83.2"
+    "serverless": "^2.11.0"
   }
 }
