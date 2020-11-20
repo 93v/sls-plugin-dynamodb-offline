@@ -55,8 +55,8 @@
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.8",
-    "@types/serverless": "^1.78.9",
+    "@types/node": "^14.14.9",
+    "@types/serverless": "^1.78.10",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "eslint": "^7.13.0",
@@ -65,16 +65,16 @@
     "husky": "^4.3.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.6",
-    "prettier": "^2.1.2",
-    "semantic-release": "^17.2.3",
+    "prettier": "^2.2.0",
+    "semantic-release": "^17.2.4",
     "ts-jest": "^26.4.4",
-    "typescript": "^4.0.5"
+    "typescript": "^4.1.2"
   },
   "files": [
     "dist/**/*"
   ],
   "dependencies": {
-    "aws-sdk": "^2.795.0",
+    "aws-sdk": "^2.796.0",
     "serverless": "^1.83.2"
   }
 }
