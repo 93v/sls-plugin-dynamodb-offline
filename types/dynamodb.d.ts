@@ -26,6 +26,7 @@ export interface DynamoDBLaunchOptions {
   inMemory?: boolean | null;
   optimizeDbBeforeStartup?: boolean | null;
   port?: number | string | null;
+  host?: string | null;
   sharedDb?: boolean | null;
 
   heapInitial?: string | null;

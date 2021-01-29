@@ -292,7 +292,9 @@ class ServerlessDynamoDBOfflinePlugin {
       | DynamoDBStreams.ClientConfiguration = {
       accessKeyId:
         this.dynamoDBConfig.start.accessKeyId || "localAwsAccessKeyId",
-      endpoint: `http://localhost:${this.dynamoDBConfig.start.port}`,
+      endpoint: `http://${this.dynamoDBConfig.start.host || "localhost"}:${
+        this.dynamoDBConfig.start.port
+      }`,
       region: this.dynamoDBConfig.start.region || "local",
       secretAccessKey:
         this.dynamoDBConfig.start.secretAccessKey || "localAwsSecretAccessKey",

@@ -59,6 +59,7 @@ custom:
       delayTransientStatuses: true # Causes DynamoDB to introduce delays for certain operations. DynamoDB (Downloadable Version) can perform some tasks almost instantaneously, such as create/update/delete operations on tables and indexes. However, the DynamoDB service requires more time for these tasks. Setting this parameter helps DynamoDB running on your computer simulate the behavior of the DynamoDB web service more closely. (Currently, this parameter introduces delays only for global secondary indexes that are in either CREATING or DELETING status.)
       inMemory: true # DynamoDB runs in memory instead of using a database file. When you stop DynamoDB, none of the data is saved. You can't specify both [dbPath] and [inMemory] at once.
       optimizeDbBeforeStartup: true # Optimizes the underlying database tables before starting DynamoDB on your computer. You also must specify [dbPath] when you use this parameter.
+      host: localhost # The host that DynamoDB uses to communicate with your application. If you don't specify this option, the default host is localhost
       port: 8000 # The port number that DynamoDB uses to communicate with your application. If you don't specify this option, the default port is 8000. If port 8000 is unavailable, this command throws an exception. You can use the port option to specify a different port number
       sharedDb: true # If you specify [sharedDb], DynamoDB uses a single database file instead of separate files for each credential and Region.
 
