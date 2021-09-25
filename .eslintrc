@@ -1,23 +1,26 @@
 {
-  "env": { "es6": true, "node": true },
+  "env": { "node": true, "jest": true },
   "extends": [
     "eslint:recommended",
-    "prettier",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint",
-    "plugin:prettier/recommended"
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2018,
+    "ecmaVersion": 2019,
     "sourceType": "module"
-    // "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
-    "prettier/prettier": ["error"],
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/explicit-function-return-type": 0
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "require-atomic-updates": 0,
+    "@typescript-eslint/interface-name-prefix": 0,
+    "@typescript-eslint/array-type": "error",
+    "no-console": "error",
+    "no-return-await": "error",
+    "no-throw-literal": "error"
   }
 }

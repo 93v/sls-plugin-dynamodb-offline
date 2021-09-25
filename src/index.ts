@@ -255,7 +255,7 @@ class ServerlessDynamoDBOfflinePlugin {
         }
       }),
     ).then((r) => {
-      console.log(r.length);
+      this.serverless.cli.log(r.length.toString());
     });
   };
 
@@ -300,7 +300,7 @@ class ServerlessDynamoDBOfflinePlugin {
         this.dynamoDBConfig.start.secretAccessKey || "localAwsSecretAccessKey",
     };
 
-    console.log(clientConfig);
+    this.serverless.cli.log(JSON.stringify(clientConfig, null, 2));
 
     this.dbClient = new DynamoDB(clientConfig);
 
