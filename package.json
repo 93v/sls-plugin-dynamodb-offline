@@ -53,7 +53,7 @@
     "@commitlint/cli": "^13.1.0",
     "@commitlint/config-conventional": "^13.1.0",
     "@types/jest": "^27.0.2",
-    "@types/node": "^14.17.19",
+    "@types/node": "^17.0.5",
     "@types/serverless": "^1.78.35",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
