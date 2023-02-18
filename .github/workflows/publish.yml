@@ -9,12 +9,12 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
       - run: npm ci
       - run: npm run lint
       - run: npm test
@@ -24,12 +24,12 @@ jobs:
     needs: lint-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
       - run: npm run build --if-present
@@ -43,12 +43,12 @@ jobs:
   #   needs: build-and-publish-gpr
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v1
+  #     - uses: actions/checkout@v3
   #       with:
   #         fetch-depth: 1
-  #     - uses: actions/setup-node@v1
+  #     - uses: actions/setup-node@v3
   #       with:
-  #         node-version: 14
+  #         node-version: 18
   #         registry-url: https://registry.npmjs.org/
   #     - run: npm ci
   #     - run: npm run build

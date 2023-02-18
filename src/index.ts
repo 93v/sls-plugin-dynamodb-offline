@@ -1,12 +1,34 @@
-import { DynamoDB, DynamoDBStreams, Lambda } from "aws-sdk/clients/all";
+// import { DynamoDB, DynamoDBStreams, Lambda } from "aws-sdk/clients/all";
+// import {
+//   GetRecordsInput,
+//   GetShardIteratorInput,
+// } from "aws-sdk/clients/dynamodbstreams";
+// import { ClientConfiguration } from "aws-sdk/clients/lambda";
 import {
+  CreateTableCommand,
+  CreateTableCommandInput,
+  DescribeTableCommand,
+  DynamoDBClient,
+  DynamoDBClientConfig,
+} from "@aws-sdk/client-dynamodb";
+import {
+  DescribeStreamCommand,
+  DynamoDBStreamsClient,
+  DynamoDBStreamsClientConfig,
+  GetRecordsCommand,
   GetRecordsInput,
+  GetShardIteratorCommand,
   GetShardIteratorInput,
-} from "aws-sdk/clients/dynamodbstreams";
-import { ClientConfiguration } from "aws-sdk/clients/lambda";
+} from "@aws-sdk/client-dynamodb-streams";
+import {
+  InvokeCommand,
+  LambdaClient,
+  LambdaClientConfig,
+} from "@aws-sdk/client-lambda";
 import { ChildProcess, spawn } from "child_process";
 import { join } from "path";
 import Serverless from "serverless";
+import { setTimeout } from "timers/promises";
 
 import { IStacksMap, Stack } from "../types/additional-stack";
 import {
@@ -21,9 +43,6 @@ const DB_LOCAL_PATH = join(__dirname, "../bin");
 
 const DEFAULT_READ_INTERVAL = 500;
 
-const pause = async (duration: number) =>
-  new Promise((r) => setTimeout(r, duration));
-
 class ServerlessDynamoDBOfflinePlugin {
   public readonly commands: Record<string, ServerlessPluginCommand>;
   public readonly hooks: Record<string, () => Promise<any>>;
@@ -31,12 +50,18 @@ class ServerlessDynamoDBOfflinePlugin {
   private additionalStacksMap: IStacksMap;
   private defaultStack: Stack;
   private dynamoDBConfig: DynamoDBConfig;
-  private dbClient?: DynamoDB;
-  private dbStreamsClient?: DynamoDBStreams;
+  private dbClient?: DynamoDBClient;
+  private dbStreamsClient?: DynamoDBStreamsClient;
   private dbInstances: Record<string, ChildProcess> = {};
+  private readonly log: (message: string) => void;
 
-  public constructor(private serverless: Serverless) {
+  public constructor(
+    private serverless: Serverless,
+    _options: any,
+    { log }: { log: (message: string) => void },
+  ) {
     this.provider = this.serverless.getProvider("aws");
+    this.log = log;
 
     this.commands = {};
 
@@ -45,9 +70,11 @@ class ServerlessDynamoDBOfflinePlugin {
     this.additionalStacksMap =
       this.serverless.service?.custom?.additionalStacks || {};
 
-    this.defaultStack = (((this.serverless.service || {}) as unknown) as {
-      resources: any;
-    }).resources;
+    this.defaultStack = (
+      (this.serverless.service || {}) as unknown as {
+        resources: any;
+      }
+    ).resources;
 
     this.hooks = {
       "before:offline:start:end": this.stopDynamoDB,
@@ -119,15 +146,17 @@ class ServerlessDynamoDBOfflinePlugin {
 
     this.dbInstances[port] = proc;
 
-    (([
-      "beforeExit",
-      "exit",
-      "SIGINT",
-      "SIGTERM",
-      "SIGUSR1",
-      "SIGUSR2",
-      "uncaughtException",
-    ] as unknown) as NodeJS.Signals[]).forEach((eventType) => {
+    (
+      [
+        "beforeExit",
+        "exit",
+        "SIGINT",
+        "SIGTERM",
+        "SIGUSR1",
+        "SIGUSR2",
+        "uncaughtException",
+      ] as unknown as NodeJS.Signals[]
+    ).forEach((eventType) => {
       process.on(eventType, () => {
         this.killDynamoDBProcess(this.dynamoDBConfig.start);
       });
@@ -149,13 +178,11 @@ class ServerlessDynamoDBOfflinePlugin {
     functionName: string,
     stream: Stream,
   ) => {
-    this.serverless.cli.log(
-      `Create stream for ${functionName} on ${stream.tableName}`,
-    );
+    this.log(`Create stream for ${functionName} on ${stream.tableName}`);
 
-    const tableDescription = await this.dbClient
-      ?.describeTable({ TableName: stream.tableName })
-      .promise();
+    const tableDescription = await this.dbClient?.send(
+      new DescribeTableCommand({ TableName: stream.tableName }),
+    );
 
     const streamArn = tableDescription?.Table?.LatestStreamArn;
 
@@ -163,11 +190,9 @@ class ServerlessDynamoDBOfflinePlugin {
       return;
     }
 
-    const streamDescription = await this.dbStreamsClient
-      ?.describeStream({
-        StreamArn: streamArn,
-      })
-      .promise();
+    const streamDescription = await this.dbStreamsClient?.send(
+      new DescribeStreamCommand({ StreamArn: streamArn }),
+    );
 
     if (streamDescription?.StreamDescription?.Shards == null) {
       return;
@@ -193,20 +218,23 @@ class ServerlessDynamoDBOfflinePlugin {
         };
 
         if (this.dynamoDBConfig.stream?.iterator) {
-          getIteratorParams.ShardIteratorType = this.dynamoDBConfig.stream?.iterator;
+          getIteratorParams.ShardIteratorType =
+            this.dynamoDBConfig.stream?.iterator;
         } else if (this.dynamoDBConfig.stream?.startAt) {
           getIteratorParams.ShardIteratorType = "AT_SEQUENCE_NUMBER";
-          getIteratorParams.SequenceNumber = this.dynamoDBConfig.stream?.startAt;
+          getIteratorParams.SequenceNumber =
+            this.dynamoDBConfig.stream?.startAt;
         } else if (this.dynamoDBConfig.stream?.startAfter) {
           getIteratorParams.ShardIteratorType = "AFTER_SEQUENCE_NUMBER";
-          getIteratorParams.SequenceNumber = this.dynamoDBConfig.stream?.startAfter;
+          getIteratorParams.SequenceNumber =
+            this.dynamoDBConfig.stream?.startAfter;
         } else {
           getIteratorParams.ShardIteratorType = "LATEST";
         }
 
-        const iterator = await this.dbStreamsClient
-          .getShardIterator(getIteratorParams)
-          .promise();
+        const iterator = await this.dbStreamsClient.send(
+          new GetShardIteratorCommand(getIteratorParams),
+        );
 
         if (iterator.ShardIterator == null) {
           return;
@@ -221,90 +249,87 @@ class ServerlessDynamoDBOfflinePlugin {
             Limit: stream.batchSize || 20,
           };
 
-          const records = await this.dbStreamsClient
-            .getRecords(getRecordsParams)
-            .promise();
+          const records = await this.dbStreamsClient.send(
+            new GetRecordsCommand(getRecordsParams),
+          );
 
           if (records.NextShardIterator != null) {
             shardIterator = records.NextShardIterator;
           }
 
           if (records.Records != null && records.Records.length) {
-            const lambdaParams: ClientConfiguration = {
-              endpoint: `http://localhost:${
+            const lambdaParams: LambdaClientConfig = {
+              endpoint: `http://127.0.0.1:${
                 this.serverless.service.custom["serverless-offline"]
                   .lambdaPort || 3002
               }`,
               region: this.dynamoDBConfig.start.region || "local",
             };
 
-            const lambda = new Lambda(lambdaParams);
+            const lambda = new LambdaClient(lambdaParams);
 
             const params = {
               FunctionName: `${this.serverless.service["service"]}-${this.serverless.service.provider.stage}-${functionName}`,
               InvocationType: "Event",
-              Payload: JSON.stringify(records),
+              Payload: new Uint8Array(Buffer.from(JSON.stringify(records))),
             };
 
-            await lambda.invoke(params).promise();
+            await lambda.send(new InvokeCommand(params));
           }
 
-          await pause(
+          await setTimeout(
             this.dynamoDBConfig.stream?.readInterval || DEFAULT_READ_INTERVAL,
           );
         }
       }),
     ).then((r) => {
-      this.serverless.cli.log(r.length.toString());
+      this.log(r.length.toString());
     });
   };
 
   private startDynamoDB = async () => {
     if (this.dynamoDBConfig.start.noStart) {
-      this.serverless.cli.log(
-        "DynamoDB Offline - [noStart] options is true. Will not start.",
-      );
+      this.log("DynamoDB Offline - [noStart] options is true. Will not start.");
     } else {
       const { port, proc } = await this.spawnDynamoDBProcess(
         this.dynamoDBConfig.start,
       );
 
       proc.on("close", (code) => {
-        this.serverless.cli.log(
-          `DynamoDB Offline - Failed to start with code ${code}`,
-        );
+        this.log(`DynamoDB Offline - Failed to start with code ${code}`);
       });
 
-      this.serverless.cli.log(
-        `DynamoDB Offline - Started, visit: http://localhost:${port}/shell`,
+      this.log(
+        `DynamoDB Offline - Started, visit: http://127.0.0.1:${port}/shell`,
       );
     }
 
     if (!this.dynamoDBConfig.start.migrate) {
-      this.serverless.cli.log(
+      this.log(
         "DynamoDB Offline - [migrate] options is not true. Will not create tables.",
       );
       return;
     }
 
-    const clientConfig:
-      | DynamoDB.ClientConfiguration
-      | DynamoDBStreams.ClientConfiguration = {
-      accessKeyId:
-        this.dynamoDBConfig.start.accessKeyId || "localAwsAccessKeyId",
-      endpoint: `http://${this.dynamoDBConfig.start.host || "localhost"}:${
+    const clientConfig: DynamoDBClientConfig | DynamoDBStreamsClientConfig = {
+      endpoint: `http://${this.dynamoDBConfig.start.host || "127.0.0.1"}:${
         this.dynamoDBConfig.start.port
       }`,
       region: this.dynamoDBConfig.start.region || "local",
-      secretAccessKey:
-        this.dynamoDBConfig.start.secretAccessKey || "localAwsSecretAccessKey",
+      credentials: {
+        accessKeyId:
+          this.dynamoDBConfig.start.accessKeyId || "localAwsAccessKeyId",
+        secretAccessKey:
+          this.dynamoDBConfig.start.secretAccessKey ||
+          "localAwsSecretAccessKey",
+      },
     };
 
-    this.serverless.cli.log(JSON.stringify(clientConfig, null, 2));
+    this.log(JSON.stringify(clientConfig, null, 2));
 
-    this.dbClient = new DynamoDB(clientConfig);
+    this.dbClient = new DynamoDBClient(clientConfig);
 
-    this.dbStreamsClient = new DynamoDBStreams(clientConfig);
+    this.dbStreamsClient = new DynamoDBStreamsClient(clientConfig);
 
     const tables: any[] = [];
     Object.values({
@@ -340,7 +365,7 @@ class ServerlessDynamoDBOfflinePlugin {
 
         await Promise.all(
           events.map(async (event) => {
-            const stream: null | Stream = event["stream"];
+            const stream = event["stream"] as Stream | undefined;
 
             if (
               stream == null ||
@@ -359,11 +384,11 @@ class ServerlessDynamoDBOfflinePlugin {
 
   private stopDynamoDB = async () => {
     this.killDynamoDBProcess(this.dynamoDBConfig.start);
-    this.serverless.cli.log("DynamoDB Offline - Stopped");
+    this.log("DynamoDB Offline - Stopped");
   };
 
-  private createTable = async (dbClient: DynamoDB, table: any) => {
-    const params: DynamoDB.CreateTableInput = table.Properties;
+  private createTable = async (dbClient: DynamoDBClient, table: any) => {
+    const params: CreateTableCommandInput = table.Properties;
 
     // Removing locally unsupported params
     if (params.SSESpecification) {
@@ -380,13 +405,11 @@ class ServerlessDynamoDBOfflinePlugin {
     }
 
     try {
-      await dbClient.createTable(params).promise();
-      this.serverless.cli.log(
-        `DynamoDB Offline - Table [${params.TableName}] created`,
-      );
+      await dbClient.send(new CreateTableCommand(params));
+      this.log(`DynamoDB Offline - Table [${params.TableName}] created`);
     } catch (error) {
       if ((error as any).code === "ResourceInUseException") {
-        this.serverless.cli.log(
+        this.log(
           `DynamoDB Offline - Table [${params.TableName}] already exists`,
         );
       } else {
