@@ -408,7 +408,7 @@ class ServerlessDynamoDBOfflinePlugin {
       await dbClient.send(new CreateTableCommand(params));
       this.log(`DynamoDB Offline - Table [${params.TableName}] created`);
     } catch (error) {
-      if ((error as any).code === "ResourceInUseException") {
+      if ((error as Error).name === "ResourceInUseException") {
         this.log(
           `DynamoDB Offline - Table [${params.TableName}] already exists`,
         );
