@@ -1,9 +1,9 @@
-// import { DynamoDB, DynamoDBStreams, Lambda } from "aws-sdk/clients/all";
-// import {
-//   GetRecordsInput,
-//   GetShardIteratorInput,
-// } from "aws-sdk/clients/dynamodbstreams";
-// import { ClientConfiguration } from "aws-sdk/clients/lambda";
+import { ChildProcess, spawn } from "child_process";
+import net from "net";
+import { join } from "path";
+import Serverless from "serverless";
+import { setTimeout } from "timers/promises";
+
 import {
   CreateTableCommand,
   CreateTableCommandInput,
@@ -25,10 +25,6 @@ import {
   LambdaClient,
   LambdaClientConfig,
 } from "@aws-sdk/client-lambda";
-import { ChildProcess, spawn } from "child_process";
-import { join } from "path";
-import Serverless from "serverless";
-import { setTimeout } from "timers/promises";
 
 import { IStacksMap, Stack } from "../types/additional-stack";
 import {
@@ -42,6 +38,26 @@ import { ServerlessPluginCommand } from "../types/serverless-plugin-command";
 const DB_LOCAL_PATH = join(__dirname, "../bin");
 
 const DEFAULT_READ_INTERVAL = 500;
+
+const isPortAvailablePromise = (port: string) =>
+  new Promise<boolean>((resolve) => {
+    const tester = net
+      .createServer()
+      .once("error", (err: any) => {
+        if (err.code !== "EADDRINUSE") {
+          return;
+        }
+        resolve(false);
+      })
+      .once("listening", () => {
+        tester
+          .once("close", () => {
+            resolve(true);
+          })
+          .close();
+      })
+      .listen(port);
+  });
 
 class ServerlessDynamoDBOfflinePlugin {
   public readonly commands: Record<string, ServerlessPluginCommand>;
@@ -88,7 +104,7 @@ class ServerlessDynamoDBOfflinePlugin {
 
     const port = (options.port || 8000).toString();
 
-    const args = [];
+    const args: string[] = [];
 
     if (options.heapInitial != null) {
       args.push(`-Xms${options.heapInitial}`);
@@ -130,39 +146,61 @@ class ServerlessDynamoDBOfflinePlugin {
       args.push("-sharedDb");
     }
 
-    const proc = spawn("java", args, {
-      cwd: DB_LOCAL_PATH,
-      env: process.env,
-      stdio: ["pipe", "pipe", process.stderr],
-    });
+    return new Promise<{ proc: ChildProcess; port: string }>(
+      (resolve, reject) => {
+        const proc = spawn("java", args, {
+          cwd: DB_LOCAL_PATH,
+          env: process.env,
+          stdio: ["pipe", "pipe", process.stderr],
+        });
 
-    if (proc.pid == null) {
-      throw new Error("Unable to start the DynamoDB Local process");
-    }
+        if (proc.pid == null) {
+          throw new Error("Unable to start the DynamoDB Local process");
+        }
 
-    proc.on("error", (error) => {
-      throw error;
-    });
+        proc.on("error", (error) => {
+          reject(error);
+        });
 
-    this.dbInstances[port] = proc;
+        proc.stdout.on("data", async (data) => {
+          this.log(data.toString());
 
-    (
-      [
-        "beforeExit",
-        "exit",
-        "SIGINT",
-        "SIGTERM",
-        "SIGUSR1",
-        "SIGUSR2",
-        "uncaughtException",
-      ] as unknown as NodeJS.Signals[]
-    ).forEach((eventType) => {
-      process.on(eventType, () => {
-        this.killDynamoDBProcess(this.dynamoDBConfig.start);
-      });
-    });
+          if (
+            data
+              .toString()
+              .includes(
+                "Initializing DynamoDB Local with the following configuration",
+              )
+          ) {
+            let isPortAvailable = await isPortAvailablePromise(port);
 
-    return { proc, port };
+            while (isPortAvailable) {
+              await setTimeout(100);
+              isPortAvailable = await isPortAvailablePromise(port);
+            }
+            resolve({ proc, port });
+          }
+        });
+
+        this.dbInstances[port] = proc;
+
+        (
+          [
+            "beforeExit",
+            "exit",
+            "SIGINT",
+            "SIGTERM",
+            "SIGUSR1",
+            "SIGUSR2",
+            "uncaughtException",
+          ] as unknown as NodeJS.Signals[]
+        ).forEach((eventType) => {
+          process.on(eventType, () => {
+            this.killDynamoDBProcess(this.dynamoDBConfig.start);
+          });
+        });
+      },
+    );
   };
 
   private killDynamoDBProcess = (options: DynamoDBLaunchOptions) => {
@@ -296,6 +334,10 @@ class ServerlessDynamoDBOfflinePlugin {
       );
 
       proc.on("close", (code) => {
+        if (code === 0) {
+          this.log("DynamoDB Offline - Stopped");
+          return;
+        }
         this.log(`DynamoDB Offline - Failed to start with code ${code}`);
       });
 
