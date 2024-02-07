@@ -1,4 +1,4 @@
-import { ShardIteratorType } from "aws-sdk/clients/dynamodbstreams";
+import { ShardIteratorType } from "@aws-sdk/client-dynamodb-streams";
 
 export interface DynamoDBConfig {
   stage?: string[];
@@ -43,5 +43,5 @@ export interface Stream {
   arn: Record<string, string>;
   tableName: string;
   batchSize: number;
-  startingPosition: string;
+  startingPosition: ShardIteratorType;
 }
