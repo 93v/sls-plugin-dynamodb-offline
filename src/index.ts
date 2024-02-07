@@ -22,6 +22,7 @@ import {
 } from "@aws-sdk/client-dynamodb-streams";
 import {
   InvokeCommand,
+  InvokeCommandInput,
   LambdaClient,
   LambdaClientConfig,
 } from "@aws-sdk/client-lambda";
@@ -306,7 +307,7 @@ class ServerlessDynamoDBOfflinePlugin {
 
             const lambda = new LambdaClient(lambdaParams);
 
-            const params = {
+            const params: InvokeCommandInput = {
               FunctionName: `${this.serverless.service["service"]}-${this.serverless.service.provider.stage}-${functionName}`,
               InvocationType: "Event",
               Payload: new Uint8Array(Buffer.from(JSON.stringify(records))),
