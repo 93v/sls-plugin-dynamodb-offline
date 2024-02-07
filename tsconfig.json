@@ -24,7 +24,6 @@
     "types": ["node", "jest"],
     "esModuleInterop": true,
     "preserveConstEnums": true,
-    "suppressImplicitAnyIndexErrors": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true
   },
